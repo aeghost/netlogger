@@ -5,17 +5,22 @@ import 'package:netlogger/driver.dart' as driver;
 import 'package:test/test.dart';
 
 void main() {
-  test('getContent', () async {
+  test('getContentFromFile', () async {
     const testPath = './assets/test_file.txt';
-    var c = await driver.getContent(testPath);
+    var c = await driver.getContentFromFile(testPath);
     expect(c, [116, 101, 115, 116, 95, 115, 116, 114, 105, 110, 103, 59]);
   });
 
-  test('writeInFile', () async {
+  test('getContentFromStdin', () async {
+    var c = driver.getContentFromStdin();
+    expect(c, 'Instance of \'Stdin\'');
+  });
+
+  test('writeStringInFile', () async {
     const testPath = './assets/test_target.txt';
     var flag = true;
     try {
-      driver.writeContentInFile('test_string;', testPath);
+      driver.writeStringInFile('test_string;', testPath);
       flag = true;
     } on Error {
       flag = false;
@@ -23,17 +28,18 @@ void main() {
     expect(flag, true);
   });
 
-  test('writeString', () async {
+  test('writeStringInSocket', () async {
     const testSock = 'ipc://_test/test';
     const content = 'test_string';
     var readContent = '';
     final ctx = ZContext();
     final pull = ctx.createSocket(SocketType.pull);
+    final push = driver.createSocket(ctx, testSock);
     pull.messages.listen((event) => readContent += event.toString());
 
     var flag = true;
     try {
-      driver.writeString(ctx, content, testSock);
+      driver.writeStringInSocket(push, content);
       sleep(Duration(seconds: 2));
       print(readContent);
       flag = content == readContent;
@@ -41,6 +47,8 @@ void main() {
       print('Error');
       flag = false;
     }
+
+    driver.closeSockets([push, pull]);
     expect(flag, true);
   });
 }

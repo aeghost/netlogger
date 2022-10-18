@@ -10,18 +10,31 @@ void main(List<String> args) async {
   Configuration c = Configuration(args);
   c.pp();
 
-  var content = [];
+  List<String?> content;
 
-  if (c.from != null) {
-    content = await driver.getContent(c.from as String);
+  if (c.from != null && !(c.from as String).contains('stdin')) {
+    content = (await driver.getContentFromFile(c.from as String)).split('\n');
+  } else {
+    content = driver.getContentFromStdin();
   }
 
-  if (content != [] && c.target != null) {
+  if (c.target != null) {
     if ((c.target as String).contains('file://')) {
-      driver.writeContentInFile(content.toString(), c.target as String);
+      driver.writeStringInFile(
+          content.fold(
+              "",
+              (value, element) =>
+                  value == "" ? "$element" : "$value\n$element"),
+          c.target as String);
     } else {
       final ctx = ZContext();
-      driver.writeString(ctx, content.toString(), c.target as String);
+      final pushSock = driver.createSocket(ctx, c.target as String);
+      for (var element in content) {
+        if (element != null) {
+          driver.writeStringInSocket(pushSock, element);
+        }
+      }
+      driver.closeSockets([pushSock]);
     }
   }
 

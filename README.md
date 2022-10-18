@@ -6,6 +6,10 @@ Typical usecase, Apache2 use this type of binary to log.
 Then you can make a little server to parse and use Apache logs.
 More efficiant than inotify or while loop on file.
 
+# Objective
+
+The objective was to quickly learn Dart and its dev environment.
+
 # Makefile rules
 
 ## Build

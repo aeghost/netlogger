@@ -1,22 +1,43 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:dartzmq/dartzmq.dart';
 
-Future<Uint8List> getContent(String path) async {
-  var content = File(path).readAsBytes();
+Future<String> getContentFromFile(String path) async {
+  var content = File(path).readAsString();
   return await content;
 }
 
-void writeContentInFile(String content, String path) async {
+List<String> getContentFromStdin() {
+  List<String> lines = [];
+  while (true) {
+    var line = stdin.readLineSync();
+    if (line == null) {
+      break;
+    }
+    lines.add(line);
+  }
+  var content = lines;
+  return content;
+}
+
+void writeStringInFile(String content, String path) async {
   await File(path).writeAsString(content);
   return;
 }
 
-void writeString(ZContext ctx, String content, String path) async {
+void writeStringInSocket(ZSocket sock, String content) async {
+  sock.sendString(content);
+}
+
+ZSocket createSocket(ZContext ctx, String path) {
   final pushSocket = ctx.createSocket(SocketType.push);
   pushSocket.connect(path);
-  pushSocket.sendString(content);
-  pushSocket.close();
+  return pushSocket;
+}
+
+void closeSockets(List<ZSocket> lsock) {
+  for (var element in lsock) {
+    element.close();
+  }
 }
 
 // String mapContent()
