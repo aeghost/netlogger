@@ -1,0 +1,15 @@
+# Files and directories created by pub.
+.dart_tool/
+.packages
+
+# Conventional directory for build output.
+_build/
+
+# Common folder to store tests
+_logs/
+
+# Targeted files output of the project
+_files/
+
+# IDE Settings
+.vscode
